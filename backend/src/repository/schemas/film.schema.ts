@@ -31,7 +31,7 @@ const ScheduleSchema = SchemaFactory.createForClass(Schedule);
 
 @Schema({ _id: false })
 export class Film {
-    @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true })
   id: string;
 
   @Prop({ required: true })

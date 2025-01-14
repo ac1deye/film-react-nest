@@ -12,4 +12,4 @@ import { Film, FilmSchema } from 'src/repository/schemas/film.schema';
   controllers: [OrderController],
   providers: [OrderService, FilmsRepository],
 })
-export class OrderModule { }
+export class OrderModule {}

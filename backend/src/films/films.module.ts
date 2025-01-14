@@ -8,9 +8,9 @@ import { FilmsRepository } from 'src/repository/films.repository';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Film.name, schema: FilmSchema }]), 
+    MongooseModule.forFeature([{ name: Film.name, schema: FilmSchema }]),
   ],
   controllers: [FilmsController],
   providers: [FilmsService, FilmsRepository],
 })
-export class FilmsModule { }
+export class FilmsModule {}
