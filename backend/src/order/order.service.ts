@@ -31,8 +31,6 @@ export class OrderService {
     for (const ticket of tickets) {
       const film = films.find((film) => film.id == ticket.film);
 
-      this.repository.find({ relations: { schedule: true } });
-
       const scheduleIndex = film.schedule.findIndex(
         (s) => s.id === ticket.session,
       );
@@ -43,8 +41,7 @@ export class OrderService {
       }
 
       const taken = film.schedule[scheduleIndex].taken;
-      film.schedule[scheduleIndex].taken =
-        taken === '' ? place : `${taken},${place}`;
+      film.schedule[scheduleIndex].taken = taken.concat([place]);
 
       if (!filmsToUpdate.some((upd) => upd.id === film.id)) {
         filmsToUpdate.push(film);

@@ -9,6 +9,7 @@ import { FilmsModule } from './films/films.module';
 import { OrderModule } from './order/order.module';
 import { Film } from './films/entities/film.entity';
 import { Schedule } from './films/entities/schedule.entity';
+import { DataSourceOptions } from 'typeorm';
 
 @Module({
   imports: [
@@ -24,16 +25,17 @@ import { Schedule } from './films/entities/schedule.entity';
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('database.url'),
-        port: config.get<number>('database.port'),
-        username: config.get<string>('database.username'),
-        password: config.get<string>('database.password'),
-        database: config.get<string>('database.name'),
-        entities: [Film, Schedule],
-        synchronize: false,
-      }),
+      useFactory: (config: ConfigService) =>
+        ({
+          type: config.get<string>('database.driver'),
+          host: config.get<string>('database.url'),
+          port: config.get<number>('database.port'),
+          username: config.get<string>('database.username'),
+          password: config.get<string>('database.password'),
+          database: config.get<string>('database.name'),
+          entities: [Film, Schedule],
+          synchronize: false,
+        }) as DataSourceOptions,
       inject: [ConfigService],
     }),
     FilmsModule,

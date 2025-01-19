@@ -46,7 +46,7 @@ export class FilmsService {
       id: root.id,
       rating: root.rating,
       director: root.director,
-      tags: root.tags.split(','),
+      tags: root.tags,
       image: root.image,
       cover: root.cover,
       title: root.title,
@@ -57,17 +57,14 @@ export class FilmsService {
   };
 
   private getScheduleMapperFn(): (schedule: Schedule) => GetScheduleDto {
-    return (root: Schedule) => {
-      const taken = root.taken === '' ? [] : root.taken.split(',');
-      return {
-        id: root.id,
-        daytime: root.daytime,
-        hall: root.hall,
-        rows: root.rows,
-        seats: root.seats,
-        price: root.price,
-        taken: taken,
-      };
-    };
+    return (root: Schedule) => ({
+      id: root.id,
+      daytime: root.daytime,
+      hall: root.hall,
+      rows: root.rows,
+      seats: root.seats,
+      price: root.price,
+      taken: root.taken,
+    });
   }
 }
