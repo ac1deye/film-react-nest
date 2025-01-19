@@ -1,16 +1,13 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { FilmsService } from './films.service';
 import { FilmsController } from './films.controller';
-import { Film, FilmSchema } from 'src/repository/schemas/film.schema';
-import { FilmsRepository } from 'src/repository/films.repository';
+import { Film } from './entities/film.entity';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Film.name, schema: FilmSchema }]),
-  ],
+  imports: [TypeOrmModule.forFeature([Film])],
   controllers: [FilmsController],
-  providers: [FilmsService, FilmsRepository],
+  providers: [FilmsService],
 })
 export class FilmsModule {}
