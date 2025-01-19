@@ -3,19 +3,34 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
+import { DataSource, In, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOrderDto, TicketDTO } from './dto/order.dto';
-import { FilmsRepository } from 'src/repository/films.repository';
+import { Film } from 'src/films/entities/film.entity';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly filmsRepository: FilmsRepository) {}
+  constructor(
+    @InjectRepository(Film) private repository: Repository<Film>,
+    private readonly dataSource: DataSource,
+  ) {}
 
   async createOrder(
     orderData: CreateOrderDto,
   ): Promise<{ items: TicketDTO[]; total: number }> {
     const tickets = orderData.tickets;
+    const filmsToUpdate = [];
+
+    const films = await this.repository.find({
+      relations: { schedule: true },
+      where: {
+        id: In(tickets.map((ticket) => ticket.film)),
+      },
+    });
+
     for (const ticket of tickets) {
-      const film = await this.filmsRepository.findOne(ticket.film);
+      const film = films.find((film) => film.id == ticket.film);
+
       const scheduleIndex = film.schedule.findIndex(
         (s) => s.id === ticket.session,
       );
@@ -25,22 +40,33 @@ export class OrderService {
         throw new BadRequestException(`Место ${place} занято`);
       }
 
-      await this.updateSeats(ticket.film, scheduleIndex, place);
+      const taken = film.schedule[scheduleIndex].taken;
+      film.schedule[scheduleIndex].taken = taken.concat([place]);
+
+      if (!filmsToUpdate.some((upd) => upd.id === film.id)) {
+        filmsToUpdate.push(film);
+      }
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await Promise.all(
+        filmsToUpdate.map((film) => queryRunner.manager.save(film)),
+      );
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      new ConflictException('Не удалось занять места');
+    } finally {
+      await queryRunner.release();
     }
 
     return {
       items: tickets,
       total: tickets.length,
     };
-  }
-
-  async updateSeats(film: string, scheduleIndex: number, place: string) {
-    try {
-      this.filmsRepository.updateOne(film, {
-        $push: { [`schedule.${scheduleIndex}.taken`]: place },
-      });
-    } catch {
-      new ConflictException('Не удалось занять места');
-    }
   }
 }
