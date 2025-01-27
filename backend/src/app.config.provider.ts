@@ -7,10 +7,12 @@ export const configProvider = (): AppConfig => ({
     password: process.env.DATABASE_PASSWORD || '',
     name: process.env.DATABASE_NAME || 'prac',
   },
+  logger: process.env.LOGGER || 'dev',
 });
 
 export interface AppConfig {
   database: AppConfigDatabase;
+  logger: string;
 }
 
 export interface AppConfigDatabase {

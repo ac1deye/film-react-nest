@@ -8,7 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export class TicketDTO {
+export class TicketDto {
   @IsString()
   @IsNotEmpty()
   film: string;
@@ -44,6 +44,6 @@ export class CreateOrderDto {
   phone: string;
 
   @ValidateNested({ each: true })
-  @Type(() => TicketDTO)
-  tickets: TicketDTO[];
+  @Type(() => TicketDto)
+  tickets: TicketDto[];
 }

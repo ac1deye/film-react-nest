@@ -1,0 +1,63 @@
+services:
+  frontend:
+    image: ghcr.io/ac1deye/film-react-nest/frontend:latest
+    container_name: frontend
+    networks:
+      - nginx
+    volumes:
+      - frontend:/app/dist
+    env_file:
+      - ./.env
+  backend:
+    image: ghcr.io/ac1deye/film-react-nest/backend:latest
+    container_name: backend
+    depends_on:
+      - postgres
+    networks:
+      - nginx
+      - postgres
+    env_file:
+      - ./.env
+    restart: unless-stopped
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    networks:
+      - postgres
+    env_file:
+      - ./.env
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    restart: unless-stopped
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - postgres
+      - nginx
+    env_file:
+      - ./.env
+    volumes:
+      - pgadmin:/var/lib/pgadmin/data
+    restart: unless-stopped
+  nginx:
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 8080:8080
+      - 443:443
+    networks:
+      - nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - frontend:/var/www/frontend:ro
+    restart: unless-stopped
+networks:
+  nginx:
+  postgres:
+volumes:
+  pg-data:
+  frontend:
+  pgadmin:
