@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { DataSource, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateOrderDto, TicketDTO } from './dto/order.dto';
-import { Film } from 'src/films/entities/film.entity';
+import { CreateOrderDto, TicketDto } from './dto/order.dto';
+import { Film } from '../films/entities/film.entity';
 
 @Injectable()
 export class OrderService {
@@ -17,7 +17,7 @@ export class OrderService {
 
   async createOrder(
     orderData: CreateOrderDto,
-  ): Promise<{ items: TicketDTO[]; total: number }> {
+  ): Promise<{ items: TicketDto[]; total: number }> {
     const tickets = orderData.tickets;
     const filmsToUpdate = [];
 
@@ -37,7 +37,7 @@ export class OrderService {
       const place = `${ticket.row}:${ticket.seat}`;
 
       if (film.schedule[scheduleIndex].taken.includes(place)) {
-        throw new BadRequestException(`Место ${place} занято`);
+        return Promise.reject(new BadRequestException(`Место ${place} занято`));
       }
 
       const taken = film.schedule[scheduleIndex].taken;
